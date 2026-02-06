@@ -9,6 +9,7 @@ WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ARG CACHEBUST=1
 
 RUN npx prisma generate
 RUN npm run build
