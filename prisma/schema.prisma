@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,13 +6,12 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// User model - Basic authentication info
 model User {
   id          String       @id @default(uuid()) @db.Uuid
   personalId  String       @unique @map("personal_id") @db.VarChar(50)
   email       String       @unique @db.VarChar(255)
   password    String       @db.VarChar(255)
+  lastLoginAt DateTime?    @map("last_login_at") @db.Timestamptz(6)
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -28,7 +24,6 @@ model User {
   @@map("users")
 }
 
-// UserProfile model - User profile information
 model UserProfile {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @unique @map("user_id") @db.Uuid
@@ -43,7 +38,6 @@ model UserProfile {
   @@map("user_profiles")
 }
 
-// Team model
 model Team {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.VarChar(255)
@@ -57,12 +51,11 @@ model Team {
   @@map("teams")
 }
 
-// TeamMember model - Many-to-many relationship between Team and User
 model TeamMember {
   id        String   @id @default(uuid()) @db.Uuid
   teamId    String   @map("team_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  role      Int      @default(2) @db.SmallInt // 0: owner, 1: admin, 2: member
+  role      Int      @default(2) @db.SmallInt
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -73,13 +66,13 @@ model TeamMember {
   @@map("team_members")
 }
 
-// Project model - 3D model/learning project
 model Project {
-  id        String   @id @default(uuid()) @db.Uuid
-  teamId    String   @map("team_id") @db.Uuid
-  name      String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id             String    @id @default(uuid()) @db.Uuid
+  teamId         String    @map("team_id") @db.Uuid
+  name           String    @db.VarChar(255)
+  lastAccessedAt DateTime? @map("last_accessed_at") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   team    Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
   members ProjectMember[]
@@ -88,12 +81,11 @@ model Project {
   @@map("projects")
 }
 
-// ProjectMember model - Many-to-many relationship between Project and User
 model ProjectMember {
   id        String   @id @default(uuid()) @db.Uuid
   projectId String   @map("project_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  role      Int      @default(2) @db.SmallInt // 0: owner, 1: admin, 2: member
+  role      Int      @default(2) @db.SmallInt
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -104,11 +96,10 @@ model ProjectMember {
   @@map("project_members")
 }
 
-// Chat model - Team or project chat
 model Chat {
   id        String   @id @default(uuid()) @db.Uuid
   teamId    String   @map("team_id") @db.Uuid
-  projectId String?  @map("project_id") @db.Uuid // Optional - project-specific chat
+  projectId String?  @map("project_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -119,25 +110,25 @@ model Chat {
   @@map("chats")
 }
 
-// Message model - Chat messages
 model Message {
-  id        String   @id @default(uuid()) @db.Uuid
-  chatId    String   @map("chat_id") @db.Uuid
-  userId    String   @map("user_id") @db.Uuid // 0: System, 1: AI (using special UUIDs)
-  content   String   @db.Text
-  targetId  String?  @map("target_id") @db.Uuid // Optional - reply to specific message
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id        String    @id @default(uuid()) @db.Uuid
+  chatId    String    @map("chat_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  content   String    @db.Text
+  targetId  String?   @map("target_id") @db.Uuid
+  editedAt  DateTime? @map("edited_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  chat         Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetMessage Message? @relation("MessageReplies", fields: [targetId], references: [id], onDelete: SetNull)
-  replies      Message[] @relation("MessageReplies")
+  chat          Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetMessage Message?  @relation("MessageReplies", fields: [targetId], references: [id], onDelete: SetNull)
+  replies       Message[] @relation("MessageReplies")
 
   @@map("messages")
 }
 
-// Assistant model - AI assistant for users
 model Assistant {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
@@ -151,12 +142,11 @@ model Assistant {
   @@map("assistants")
 }
 
-// Question model - User questions to assistant
 model Question {
   id          String   @id @default(uuid()) @db.Uuid
   assistantId String   @map("assistant_id") @db.Uuid
   content     String   @db.Text
-  nodeName    String?  @map("node_name") @db.VarChar(255) // Optional - 3D hierarchy node name
+  nodeName    String?  @map("node_name") @db.VarChar(255)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -165,12 +155,11 @@ model Question {
   @@map("questions")
 }
 
-// Answer model - Assistant answers
 model Answer {
   id          String   @id @default(uuid()) @db.Uuid
   assistantId String   @map("assistant_id") @db.Uuid
   content     String   @db.Text
-  nodeName    String?  @map("node_name") @db.VarChar(255) // Optional - 3D hierarchy node name
+  nodeName    String?  @map("node_name") @db.VarChar(255)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

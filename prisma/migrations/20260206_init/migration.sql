@@ -4,6 +4,7 @@ CREATE TABLE "users" (
     "personal_id" VARCHAR(50) NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "password" VARCHAR(255) NOT NULL,
+    "last_login_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
@@ -50,6 +51,7 @@ CREATE TABLE "projects" (
     "id" UUID NOT NULL,
     "team_id" UUID NOT NULL,
     "name" VARCHAR(255) NOT NULL,
+    "last_accessed_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
@@ -86,6 +88,8 @@ CREATE TABLE "messages" (
     "user_id" UUID NOT NULL,
     "content" TEXT NOT NULL,
     "target_id" UUID,
+    "edited_at" TIMESTAMPTZ(6),
+    "deleted_at" TIMESTAMPTZ(6),
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
