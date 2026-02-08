@@ -6,12 +6,13 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+// 사용자 기본 정보
 model User {
   id          String       @id @default(uuid()) @db.Uuid
-  personalId  String       @unique @map("personal_id") @db.VarChar(50)
-  email       String       @unique @db.VarChar(255)
-  password    String       @db.VarChar(255)
-  lastLoginAt DateTime?    @map("last_login_at") @db.Timestamptz(6)
+  personalId  String       @unique @map("personal_id") @db.VarChar(50) // 사용자 고유 ID
+  email       String       @unique @db.VarChar(255) // 이메일
+  password    String       @db.VarChar(255) // 비밀번호
+  lastLoginAt DateTime?    @map("last_login_at") @db.Timestamptz(6) // 마지막 로그인 시간
   createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -24,12 +25,13 @@ model User {
   @@map("users")
 }
 
+// 사용자 프로필 정보
 model UserProfile {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @unique @map("user_id") @db.Uuid
-  nickname  String   @db.VarChar(100)
-  aboutUs   String?  @map("about_us") @db.Text
-  avatar    String?  @db.VarChar(500)
+  nickname  String   @db.VarChar(100) // 닉네임
+  aboutUs   String?  @map("about_us") @db.Text // 자기소개
+  avatar    String?  @db.VarChar(500) // 프로필 이미지 URL
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -38,9 +40,10 @@ model UserProfile {
   @@map("user_profiles")
 }
 
+// 팀 정보
 model Team {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.VarChar(255)
+  name      String   @db.VarChar(255) // 팀 이름
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -51,11 +54,12 @@ model Team {
   @@map("teams")
 }
 
+// 팀 멤버 정보
 model TeamMember {
   id        String   @id @default(uuid()) @db.Uuid
   teamId    String   @map("team_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  role      Int      @default(2) @db.SmallInt
+  role      Int      @default(2) @db.SmallInt // 권한 (1: 관리자, 2: 일반)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -66,11 +70,12 @@ model TeamMember {
   @@map("team_members")
 }
 
+// 프로젝트 정보
 model Project {
   id             String    @id @default(uuid()) @db.Uuid
   teamId         String    @map("team_id") @db.Uuid
-  name           String    @db.VarChar(255)
-  lastAccessedAt DateTime? @map("last_accessed_at") @db.Timestamptz(6)
+  name           String    @db.VarChar(255) // 프로젝트 이름
+  lastAccessedAt DateTime? @map("last_accessed_at") @db.Timestamptz(6) // 마지막 접근 시간
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -81,11 +86,12 @@ model Project {
   @@map("projects")
 }
 
+// 프로젝트 멤버 정보
 model ProjectMember {
   id        String   @id @default(uuid()) @db.Uuid
   projectId String   @map("project_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  role      Int      @default(2) @db.SmallInt
+  role      Int      @default(2) @db.SmallInt // 권한 (1: 관리자, 2: 일반)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -96,10 +102,11 @@ model ProjectMember {
   @@map("project_members")
 }
 
+// 채팅방 정보
 model Chat {
   id        String   @id @default(uuid()) @db.Uuid
   teamId    String   @map("team_id") @db.Uuid
-  projectId String?  @map("project_id") @db.Uuid
+  projectId String?  @map("project_id") @db.Uuid // 프로젝트 ID (선택)
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -110,14 +117,15 @@ model Chat {
   @@map("chats")
 }
 
+// 메시지 정보
 model Message {
   id        String    @id @default(uuid()) @db.Uuid
   chatId    String    @map("chat_id") @db.Uuid
   userId    String    @map("user_id") @db.Uuid
-  content   String    @db.Text
-  targetId  String?   @map("target_id") @db.Uuid
-  editedAt  DateTime? @map("edited_at") @db.Timestamptz(6)
-  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+  content   String    @db.Text // 메시지 내용
+  targetId  String?   @map("target_id") @db.Uuid // 답장 대상 메시지 ID
+  editedAt  DateTime? @map("edited_at") @db.Timestamptz(6) // 수정 시간
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6) // 삭제 시간
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -129,6 +137,7 @@ model Message {
   @@map("messages")
 }
 
+// AI 어시스턴트 정보
 model Assistant {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
@@ -142,11 +151,12 @@ model Assistant {
   @@map("assistants")
 }
 
+// 질문 정보
 model Question {
   id          String   @id @default(uuid()) @db.Uuid
   assistantId String   @map("assistant_id") @db.Uuid
-  content     String   @db.Text
-  nodeName    String?  @map("node_name") @db.VarChar(255)
+  content     String   @db.Text // 질문 내용
+  nodeName    String?  @map("node_name") @db.VarChar(255) // 3D 노드 이름
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -155,11 +165,12 @@ model Question {
   @@map("questions")
 }
 
+// 답변 정보
 model Answer {
   id          String   @id @default(uuid()) @db.Uuid
   assistantId String   @map("assistant_id") @db.Uuid
-  content     String   @db.Text
-  nodeName    String?  @map("node_name") @db.VarChar(255)
+  content     String   @db.Text // 답변 내용
+  nodeName    String?  @map("node_name") @db.VarChar(255) // 3D 노드 이름
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
