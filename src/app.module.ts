@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { TeamModule } from './modules/team/team.module';
 import { ProjectModule } from './modules/project/project.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { MemoModule } from './modules/memo/memo.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { ProjectModule } from './modules/project/project.module';
     ProfileModule,
     TeamModule,
     ProjectModule,
+    ChatModule,
+    MemoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
