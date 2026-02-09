@@ -31,6 +31,12 @@ export class ProjectController {
     return this.projectService.findAll(userId);
   }
 
+  @Get('team/:teamId')
+  @ApiOperation({ summary: 'Get all projects for team' })
+  findByTeam(@Param('teamId') teamId: string) {
+    return this.projectService.findByTeam(teamId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get project by id' })
   findOne(@Param('id') id: string) {

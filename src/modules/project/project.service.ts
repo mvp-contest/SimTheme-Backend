@@ -66,6 +66,27 @@ export class ProjectService {
     });
   }
 
+  async findByTeam(teamId: string) {
+    return this.prisma.project.findMany({
+      where: { teamId },
+      include: {
+        team: true,
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                personalId: true,
+                email: true,
+                profile: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
   async findOne(id: string) {
     return this.prisma.project.findUnique({
       where: { id },
