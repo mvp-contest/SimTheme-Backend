@@ -10,6 +10,7 @@ import {
   UploadedFiles,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -29,10 +30,13 @@ export class ProjectController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'glbFiles', maxCount: 50 },
-      { name: 'metaData', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'glbFiles', maxCount: 50 },
+        { name: 'metaData', maxCount: 1 },
+      ],
+      { storage: memoryStorage() },
+    ),
   )
   create(
     @Body('teamId') teamId: string,
@@ -56,10 +60,13 @@ export class ProjectController {
   @ApiOperation({ summary: 'Upload additional files to project' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'glbFiles', maxCount: 50 },
-      { name: 'metaData', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor(
+      [
+        { name: 'glbFiles', maxCount: 50 },
+        { name: 'metaData', maxCount: 1 },
+      ],
+      { storage: memoryStorage() },
+    ),
   )
   uploadFiles(
     @Param('id') id: string,
