@@ -16,7 +16,7 @@ export class ProjectService {
   async create(
     createProjectDto: CreateProjectDto,
     creatorId: string,
-    modelFile?: Express.Multer.File,
+    modelFiles?: Express.Multer.File[],
     jsonFile?: Express.Multer.File,
   ) {
     const project = await this.prisma.project.create({
@@ -47,10 +47,10 @@ export class ProjectService {
       },
     });
 
-    if (modelFile && jsonFile) {
-      const { modelFileUrl, jsonFileUrl } =
+    if (modelFiles?.length && jsonFile) {
+      const { modelFolderUrl, jsonFileUrl } =
         await this.uploadService.uploadProjectFiles(
-          modelFile,
+          modelFiles,
           jsonFile,
           project.id,
         );
@@ -58,7 +58,7 @@ export class ProjectService {
       return this.prisma.project.update({
         where: { id: project.id },
         data: {
-          modelFileUrl,
+          modelFolderUrl,
           jsonFileUrl,
         },
         include: {

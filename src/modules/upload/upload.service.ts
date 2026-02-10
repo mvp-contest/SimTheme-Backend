@@ -39,15 +39,24 @@ export class UploadService {
   }
 
   async uploadProjectFiles(
-    modelFile: Express.Multer.File,
+    modelFiles: Express.Multer.File[],
     jsonFile: Express.Multer.File,
     projectId: string,
-  ): Promise<{ modelFileUrl: string; jsonFileUrl: string }> {
-    const [modelFileUrl, jsonFileUrl] = await Promise.all([
-      this.uploadFile(modelFile, `projects/${projectId}/models`),
-      this.uploadFile(jsonFile, `projects/${projectId}/data`),
-    ]);
+  ): Promise<{ modelFolderUrl: string; jsonFileUrl: string }> {
+    const uploadPromises = modelFiles.map((file) =>
+      this.uploadFile(file, `projects/${projectId}/models`),
+    );
 
-    return { modelFileUrl, jsonFileUrl };
+    const jsonFilePromise = this.uploadFile(
+      jsonFile,
+      `projects/${projectId}/data`,
+    );
+
+    await Promise.all([...uploadPromises, jsonFilePromise]);
+
+    const modelFolderUrl = `${this.cdnUrl}/projects/${projectId}/models`;
+    const jsonFileUrl = await jsonFilePromise;
+
+    return { modelFolderUrl, jsonFileUrl };
   }
 }

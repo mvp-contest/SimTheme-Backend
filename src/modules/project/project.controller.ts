@@ -23,11 +23,13 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create project with 3D model and JSON files' })
+  @ApiOperation({
+    summary: 'Create project with multiple 3D model files and JSON file',
+  })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: 'modelFile', maxCount: 1 },
+      { name: 'modelFiles', maxCount: 50 },
       { name: 'jsonFile', maxCount: 1 },
     ]),
   )
@@ -36,14 +38,14 @@ export class ProjectController {
     @Body('creatorId') creatorId: string,
     @UploadedFiles()
     files: {
-      modelFile?: Express.Multer.File[];
+      modelFiles?: Express.Multer.File[];
       jsonFile?: Express.Multer.File[];
     },
   ) {
     return this.projectService.create(
       createProjectDto,
       creatorId,
-      files?.modelFile?.[0],
+      files?.modelFiles,
       files?.jsonFile?.[0],
     );
   }
