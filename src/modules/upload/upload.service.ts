@@ -58,7 +58,7 @@ export class UploadService {
   ): Promise<string> {
     const folder = `projects/${projectId}`;
     const uploadPromises = glbFiles.map((file) =>
-      this.uploadFile(file, folder),
+      this.uploadFileWithOriginalName(file, folder),
     );
 
     await Promise.all(uploadPromises);
@@ -120,7 +120,7 @@ export class UploadService {
     const folder = `projects/${projectId}`;
 
     const uploadPromises = glbFiles.map((file) =>
-      this.uploadFile(file, folder),
+      this.uploadFileWithOriginalName(file, folder),
     );
 
     const jsonFilePromise = this.uploadFileWithOriginalName(metaData, folder);
