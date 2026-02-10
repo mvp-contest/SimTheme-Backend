@@ -101,7 +101,7 @@ export class ProjectService {
       if (metaData) {
         const jsonFileUrl = await this.uploadService.uploadFile(
           metaData,
-          `projects/${projectId}/data`,
+          `projects/${projectId}`,
         );
         updateData.jsonFileUrl = jsonFileUrl;
       }
