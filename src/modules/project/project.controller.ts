@@ -6,8 +6,11 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiConsumes } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -20,9 +23,29 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create project' })
-  create(@Body() createProjectDto: CreateProjectDto, @Body('creatorId') creatorId: string) {
-    return this.projectService.create(createProjectDto, creatorId);
+  @ApiOperation({ summary: 'Create project with 3D model and JSON files' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'modelFile', maxCount: 1 },
+      { name: 'jsonFile', maxCount: 1 },
+    ]),
+  )
+  create(
+    @Body() createProjectDto: CreateProjectDto,
+    @Body('creatorId') creatorId: string,
+    @UploadedFiles()
+    files: {
+      modelFile?: Express.Multer.File[];
+      jsonFile?: Express.Multer.File[];
+    },
+  ) {
+    return this.projectService.create(
+      createProjectDto,
+      creatorId,
+      files?.modelFile?.[0],
+      files?.jsonFile?.[0],
+    );
   }
 
   @Get('user/:userId')
@@ -71,12 +94,19 @@ export class ProjectController {
     @Param('userId') userId: string,
     @Body() updateMemberRoleDto: UpdateProjectMemberRoleDto,
   ) {
-    return this.projectService.updateMemberRole(projectId, userId, updateMemberRoleDto);
+    return this.projectService.updateMemberRole(
+      projectId,
+      userId,
+      updateMemberRoleDto,
+    );
   }
 
   @Delete(':projectId/members/:userId')
   @ApiOperation({ summary: 'Remove member from project' })
-  removeMember(@Param('projectId') projectId: string, @Param('userId') userId: string) {
+  removeMember(
+    @Param('projectId') projectId: string,
+    @Param('userId') userId: string,
+  ) {
     return this.projectService.removeMember(projectId, userId);
   }
 

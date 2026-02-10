@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AddProjectMemberDto } from './dto/add-member.dto';
@@ -7,17 +8,25 @@ import { UpdateProjectMemberRoleDto } from './dto/update-member-role.dto';
 
 @Injectable()
 export class ProjectService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploadService: UploadService,
+  ) {}
 
-  async create(createProjectDto: CreateProjectDto, creatorId: string) {
-    return this.prisma.project.create({
+  async create(
+    createProjectDto: CreateProjectDto,
+    creatorId: string,
+    modelFile?: Express.Multer.File,
+    jsonFile?: Express.Multer.File,
+  ) {
+    const project = await this.prisma.project.create({
       data: {
         teamId: createProjectDto.teamId,
         name: createProjectDto.name,
         members: {
           create: {
             userId: creatorId,
-            role: 1, // Creator is admin
+            role: 1,
           },
         },
       },
@@ -37,6 +46,40 @@ export class ProjectService {
         team: true,
       },
     });
+
+    if (modelFile && jsonFile) {
+      const { modelFileUrl, jsonFileUrl } =
+        await this.uploadService.uploadProjectFiles(
+          modelFile,
+          jsonFile,
+          project.id,
+        );
+
+      return this.prisma.project.update({
+        where: { id: project.id },
+        data: {
+          modelFileUrl,
+          jsonFileUrl,
+        },
+        include: {
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  personalId: true,
+                  email: true,
+                  profile: true,
+                },
+              },
+            },
+          },
+          team: true,
+        },
+      });
+    }
+
+    return project;
   }
 
   async findAll(userId: string) {
